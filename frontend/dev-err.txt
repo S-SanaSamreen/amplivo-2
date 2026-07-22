@@ -1,0 +1,9 @@
+⚠ Port 3000 is in use by process 3784, using available port 3001 instead.
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3000
+- PID:          3784
+- Dir:          c:\Users\DELL\Downloads\AmplivoProject\AmplivoProject\frontend
+- Log:          .next\dev\logs\next-development.log
+
+Run taskkill /PID 3784 /F to stop it.

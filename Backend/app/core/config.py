@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # with. Everything else DB-related below configures how that connection
     # behaves (pooling, SSL) - it does not change which database is used.
     DATABASE_URL: str = Field(
-        default="postgresql+asyncpg://postgres:postgres@localhost:5432/amplivo_erp"
+        default="postgresql+asyncpg://postgres:Shivanigoud%400918@db.fhxkiprlcdwbgtaxlffk.supabase.co:5432/postgres"
     )
 
     DB_POOL_SIZE: int = 5
@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     DB_STARTUP_TIMEOUT_SECONDS: float = 5.0
     # "require" for Supabase or any remote Postgres; "disable" for local
     # development against a Postgres instance with no SSL configured.
-    DB_SSL_MODE: Literal["require", "disable"] = "disable"
+    DB_SSL_MODE: Literal["require", "disable"] = "require"
 
     # Captured for completeness / any future use of the Supabase client SDK
     # directly (Storage, Realtime, etc.). Not read by the SQLAlchemy

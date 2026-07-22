@@ -1,0 +1,26 @@
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/build.log
+frontend/dev-out.txt
+frontend/dev-err.txt
+frontend/npm_install.log
+frontend/tsconfig.tsbuildinfo
+
+# Python
+Backend/__pycache__/
+Backend/**/__pycache__/
+Backend/**/*.pyc
+Backend/.venv/
+Backend/venv/
+Backend/*.log
+Backend/tmp_token.txt
+
+# Secrets — never commit real .env files
+# (Backend/.env is already committed; keep .env.local out)
+frontend/.env.local
+frontend/.env*.local
+
+# OS
+.DS_Store
+Thumbs.db

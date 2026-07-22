@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # with. Everything else DB-related below configures how that connection
     # behaves (pooling, SSL) - it does not change which database is used.
     DATABASE_URL: str = Field(
-        default="postgresql+asyncpg://postgres:Shivanigoud%400918@db.fhxkiprlcdwbgtaxlffk.supabase.co:5432/postgres"
+        default="postgresql+asyncpg://postgres.fhxkiprlcdwbgtaxlffk:Shivanigoud%400918@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
     )
 
     DB_POOL_SIZE: int = 5

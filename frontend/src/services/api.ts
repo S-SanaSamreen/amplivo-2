@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { useAuthStore } from '@/store/authStore';
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://amplivo-2.onrender.com/api/v1';
+const baseURL = (process.env.NEXT_PUBLIC_API_URL || 'https://amplivo-2.onrender.com/api/v1').replace('amplivo-backend.onrender.com', 'amplivo-2.onrender.com');
 
 export const api = axios.create({
   baseURL,

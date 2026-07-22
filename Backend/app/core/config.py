@@ -50,7 +50,11 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins_list(self) -> list[str]:
-        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+        v = self.CORS_ORIGINS.strip()
+        if v.startswith("["):
+            import json
+            return json.loads(v)
+        return [o.strip() for o in v.split(",") if o.strip()]
 
     MAX_FAILED_LOGIN_ATTEMPTS: int = 5
     ACCOUNT_LOCK_MINUTES: int = 15

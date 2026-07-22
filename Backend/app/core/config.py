@@ -1,7 +1,8 @@
 from functools import lru_cache
 from typing import Literal
+import json
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -46,7 +47,19 @@ class Settings(BaseSettings):
 
     BCRYPT_ROUNDS: int = 12
 
-    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "https://amplivo-2.vercel.app"]
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: str | list[str]) -> list[str]:
+        if isinstance(v, list):
+            return v
+        if not v or not v.strip():
+            return ["http://localhost:3000", "https://amplivo-2.vercel.app"]
+        v = v.strip()
+        if v.startswith("["):
+            return json.loads(v)
+        return [i.strip() for i in v.split(",") if i.strip()]
 
     MAX_FAILED_LOGIN_ATTEMPTS: int = 5
     ACCOUNT_LOCK_MINUTES: int = 15

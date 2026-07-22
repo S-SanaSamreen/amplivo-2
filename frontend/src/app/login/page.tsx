@@ -61,7 +61,7 @@ export default function LoginPage() {
       if (apiMessage) {
         setLoginError(apiMessage);
       } else if (!axiosError?.response) {
-        setLoginError('Cannot connect to backend server. Please check if FastAPI server is running on http://localhost:8000.');
+        setLoginError('Cannot connect to the server. Please try again later.');
       } else {
         setLoginError('Invalid email or password. Please try again.');
       }

@@ -4,7 +4,6 @@ services:
     name: amplivo-backend
     runtime: python
     rootDir: Backend
-    pythonVersion: "3.11.9"
     buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
@@ -54,7 +53,6 @@ services:
     name: amplivo-frontend
     runtime: node
     rootDir: frontend
-    nodeVersion: "20.11.0"
     buildCommand: npm ci && npm run build
     startCommand: npm start
     envVars:

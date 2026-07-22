@@ -61,9 +61,14 @@ export default function LoginPage() {
       if (apiMessage) {
         setLoginError(apiMessage);
       } else if (!axiosError?.response) {
-        setLoginError('Cannot connect to the server. Please try again later.');
+        setLoginError('Network error. Please try again.');
       } else {
-        setLoginError('Invalid email or password. Please try again.');
+        const status = axiosError?.response?.status;
+        if (status === 500) {
+          setLoginError('Server error. The backend may have a database connection issue.');
+        } else {
+          setLoginError('Invalid email or password. Please try again.');
+        }
       }
     }
   };

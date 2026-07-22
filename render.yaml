@@ -8,7 +8,7 @@ services:
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
-        sync: false
+        value: postgresql+asyncpg://postgres:Shivanigoud%400918@db.fhxkiprlcdwbgtaxlffk.supabase.co:5432/postgres
       - key: DB_SSL_MODE
         value: require
       - key: DB_POOL_SIZE

@@ -50,6 +50,8 @@ class RateLimiterMiddleware(BaseHTTPMiddleware):
         }
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        if request.method == "OPTIONS":
+            return await call_next(request)
         rule = self._rules.get(request.url.path)
         if rule is None:
             return await call_next(request)

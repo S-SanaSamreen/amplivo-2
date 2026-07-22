@@ -70,8 +70,8 @@ app.add_middleware(AuthenticationMiddleware)
 app.add_middleware(ActivityMiddleware)
 app.add_middleware(SessionMiddleware)
 app.add_middleware(AuditMiddleware)
-app.add_middleware(RateLimiterMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RateLimiterMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,

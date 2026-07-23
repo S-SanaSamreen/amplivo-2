@@ -25,10 +25,25 @@ interface Client { id: string; company_name: string; }
 interface User { id: string; full_name: string; username: string; }
 
 interface PaginatedResponse {
-  results: Project[];
-  count: number;
-  next: string | null;
-  previous: string | null;
+  items: Project[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+// API list endpoints paginate as { items: [...] }, not { results: [...] }.
+// Normalizes defensively against any shape (array already, { items },
+// { results }, { data }, or null/undefined) so a mismatch never leaves a
+// non-array in state, which crashes every .map() call on that state.
+function toArray<T>(response: unknown): T[] {
+  if (Array.isArray(response)) return response;
+  if (response && typeof response === 'object') {
+    const obj = response as Record<string, unknown>;
+    if (Array.isArray(obj.items)) return obj.items as T[];
+    if (Array.isArray(obj.results)) return obj.results as T[];
+    if (Array.isArray(obj.data)) return obj.data as T[];
+  }
+  return [];
 }
 
 const STATUS_FILTERS = ['All', 'Planning', 'In Progress', 'Review', 'Completed', 'On Hold', 'Cancelled'];
@@ -67,8 +82,8 @@ export default function AdminProjects() {
       if (search) params.search = search;
       if (statusFilter !== 'All') params.status = statusFilter;
       const data: PaginatedResponse = await projectService.getAll(params);
-      setProjects(data.results || []);
-      setTotalCount(data.count || 0);
+      setProjects(toArray<Project>(data));
+      setTotalCount(data?.total ?? 0);
     } catch {
       setProjects([]);
       setTotalCount(0);
@@ -84,11 +99,11 @@ export default function AdminProjects() {
   useEffect(() => {
     if (showModal) {
       Promise.all([
-        clientService.getAll({ page_size: 100 }).catch(() => ({ results: [] })),
-        userManagementService.getUsers({ page_size: 100 }).catch(() => ({ results: [] })),
+        clientService.getAll({ page_size: 100 }).catch(() => ({ items: [] })),
+        userManagementService.getUsers({ page_size: 100 }).catch(() => ({ items: [] })),
       ]).then(([c, u]: any[]) => {
-        setClients(c.results || []);
-        setManagers(u.results || []);
+        setClients(toArray<Client>(c));
+        setManagers(toArray<User>(u));
       });
     }
   }, [showModal]);

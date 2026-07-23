@@ -43,6 +43,62 @@ interface DashboardData {
   }>;
   totalAdSpend: number;
   consultationRequests: ConsultationRequest[];
+  revenueTrend: { month: string; revenue: number; adSpend: number }[];
+  leadDistribution: { name: string; value: number; color: string }[];
+}
+
+const LEAD_STATUS_COLORS: Record<string, string> = {
+  new: '#4C1D95',
+  contacted: '#06B6D4',
+  qualified: '#10B981',
+  proposal: '#F59E0B',
+  won: '#22C55E',
+  lost: '#EF4444',
+};
+const LEAD_STATUS_FALLBACK_COLOR = '#94A3B8';
+
+function buildMonthlyTrend(
+  invoices: { issue_date?: string; total_amount?: number }[],
+  campaigns: { start_date?: string; spent_amount?: number }[]
+): { month: string; revenue: number; adSpend: number }[] {
+  const months: { key: string; label: string }[] = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({ key: `${d.getFullYear()}-${d.getMonth()}`, label: d.toLocaleString('en-US', { month: 'short' }) });
+  }
+  const revenueByMonth = new Map<string, number>();
+  for (const inv of invoices) {
+    if (!inv.issue_date) continue;
+    const d = new Date(inv.issue_date);
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    revenueByMonth.set(key, (revenueByMonth.get(key) ?? 0) + (inv.total_amount ?? 0));
+  }
+  const spendByMonth = new Map<string, number>();
+  for (const c of campaigns) {
+    if (!c.start_date) continue;
+    const d = new Date(c.start_date);
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    spendByMonth.set(key, (spendByMonth.get(key) ?? 0) + (c.spent_amount ?? 0));
+  }
+  return months.map(({ key, label }) => ({
+    month: label,
+    revenue: Math.round(revenueByMonth.get(key) ?? 0),
+    adSpend: Math.round(spendByMonth.get(key) ?? 0),
+  }));
+}
+
+function buildLeadDistribution(leads: { status?: string }[]): { name: string; value: number; color: string }[] {
+  const counts = new Map<string, number>();
+  for (const lead of leads) {
+    const status = (lead.status || 'unknown').toLowerCase();
+    counts.set(status, (counts.get(status) ?? 0) + 1);
+  }
+  return Array.from(counts.entries()).map(([status, value]) => ({
+    name: status.charAt(0).toUpperCase() + status.slice(1),
+    value,
+    color: LEAD_STATUS_COLORS[status] ?? LEAD_STATUS_FALLBACK_COLOR,
+  }));
 }
 
 export default function AdminDashboard() {
@@ -104,6 +160,8 @@ export default function AdminDashboard() {
           pendingTasks: pendingTasks.slice(0, 4),
           totalAdSpend,
           consultationRequests: consultations.slice(0, 5),
+          revenueTrend: buildMonthlyTrend(invoices, campaigns),
+          leadDistribution: buildLeadDistribution(leads),
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
@@ -182,44 +240,32 @@ export default function AdminDashboard() {
                 <option>This Year</option>
               </select>
             </div>
-            <PerformanceChart data={[]} height={250} />
-            {(!data || data.totalActiveCampaigns === 0) && (
+            <PerformanceChart data={data?.revenueTrend ?? []} height={250} />
+            {(!data || data.revenueTrend.every((m) => m.revenue === 0 && m.adSpend === 0)) && (
               <div className="flex items-center justify-center h-[250px] -mt-[250px]">
                 <p className="text-slate-400 text-sm">No campaign data available</p>
               </div>
             )}
           </div>
-          
+
           <div className="bg-white rounded-2xl p-6 border border-slate-200">
             <h3 className="font-bold text-slate-900 mb-4">Lead Distribution</h3>
-            <LeadSourceChart data={[]} height={180} />
+            <LeadSourceChart data={data?.leadDistribution ?? []} height={180} />
             {(!data || data.totalLeads === 0) && (
               <div className="flex items-center justify-center h-[180px] -mt-[180px]">
                 <p className="text-slate-400 text-sm">No lead data available</p>
               </div>
             )}
             <div className="mt-6 space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full flex-shrink-0 bg-[#4C1D95]" />
-                  <span className="text-slate-600 font-medium">Total Leads</span>
+              {(data?.leadDistribution ?? []).map((entry) => (
+                <div key={entry.name} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
+                    <span className="text-slate-600 font-medium">{entry.name}</span>
+                  </div>
+                  <span className="font-bold text-slate-900">{entry.value}</span>
                 </div>
-                <span className="font-bold text-slate-900">{data?.totalLeads ?? 0}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full flex-shrink-0 bg-[#06B6D4]" />
-                  <span className="text-slate-600 font-medium">Active Campaigns</span>
-                </div>
-                <span className="font-bold text-slate-900">{data?.totalActiveCampaigns ?? 0}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full flex-shrink-0 bg-[#10B981]" />
-                  <span className="text-slate-600 font-medium">Active Clients</span>
-                </div>
-                <span className="font-bold text-slate-900">{data?.activeClients ?? 0}</span>
-              </div>
+              ))}
             </div>
           </div>
         </div>

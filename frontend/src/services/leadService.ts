@@ -44,6 +44,16 @@ export interface LeadRead {
   updated_at: string;
 }
 
+// source_id and assigned_to are optional UUID columns on the backend
+// (uuid.UUID | None). Form fields default to '' rather than being omitted,
+// and '' fails UUID validation (422) where omitting the key / null does not.
+function withoutEmptyUuidFields<T extends { source_id?: string; assigned_to?: string }>(payload: T): T {
+  const cleaned = { ...payload };
+  if (!cleaned.source_id) delete cleaned.source_id;
+  if (!cleaned.assigned_to) delete cleaned.assigned_to;
+  return cleaned;
+}
+
 export const leadService = {
   getAll: async (params?: {
     page?: number;
@@ -66,12 +76,12 @@ export const leadService = {
   },
 
   create: async (payload: LeadCreatePayload): Promise<LeadRead> => {
-    const { data } = await api.post('/leads', payload);
+    const { data } = await api.post('/leads', withoutEmptyUuidFields(payload));
     return data;
   },
 
   update: async (id: string, payload: LeadUpdatePayload): Promise<LeadRead> => {
-    const { data } = await api.put(`/leads/${id}`, payload);
+    const { data } = await api.put(`/leads/${id}`, withoutEmptyUuidFields(payload));
     return data;
   },
 

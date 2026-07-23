@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # with. Everything else DB-related below configures how that connection
     # behaves (pooling, SSL) - it does not change which database is used.
     DATABASE_URL: str = Field(
-        default="postgresql+asyncpg://postgres.fhxkiprlcdwbgtaxlffk:Shivanigoud%400918@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
+        default="postgresql+asyncpg://postgres.fhxkiprlcdwbgtaxlffk:Shivanivpd123@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
     )
 
     DB_POOL_SIZE: int = 5
@@ -46,7 +46,10 @@ class Settings(BaseSettings):
 
     BCRYPT_ROUNDS: int = 12
 
-    CORS_ORIGINS: str = "http://localhost:3000,https://amplivo-2.vercel.app"
+    CORS_ORIGINS: str = (
+        "http://localhost:3000,http://127.0.0.1:3000,"
+        "https://amplivo-front-and-backend.vercel.app,https://amplivo-2.vercel.app"
+    )
 
     @property
     def cors_origins_list(self) -> list[str]:

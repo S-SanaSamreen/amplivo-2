@@ -18,6 +18,7 @@ from app.dependencies.db import get_db
 from app.middleware.activity import ActivityMiddleware
 from app.middleware.audit import AuditMiddleware
 from app.middleware.authentication import AuthenticationMiddleware
+from app.middleware.error_boundary import UnhandledErrorMiddleware
 from app.middleware.exception_handler import register_exception_handlers
 from app.middleware.rate_limiter import RateLimiterMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
@@ -60,18 +61,23 @@ app = FastAPI(
 
 # Middleware is added innermost-first: Starlette wraps the stack so the LAST
 # middleware added ends up OUTERMOST (sees the request first, the response
-# last). Desired outer-to-inner order: CORS, SecurityHeaders, RateLimiter,
-# Audit, Session, Activity, Authentication - so SecurityHeaders still stamps
-# headers onto a 429 returned directly by RateLimiter, CORS handles preflight
-# before anything else runs, and SessionMiddleware resolves
+# last). Desired outer-to-inner order: CORS, UnhandledError, SecurityHeaders,
+# RateLimiter, Audit, Session, Activity, Authentication - so SecurityHeaders
+# still stamps headers onto a 429 returned directly by RateLimiter, CORS
+# handles preflight before anything else runs, and SessionMiddleware resolves
 # request.state.session_id before ActivityMiddleware reads it (Session must
 # be added after - i.e. more outer than - Activity for that ordering to hold).
+# UnhandledErrorMiddleware sits just inside CORS so a raw exception (e.g. a
+# DB error not wrapped in AppException) still produces a response that
+# passes back through CORSMiddleware - see error_boundary.py for why that
+# would otherwise strip CORS headers and look like a CORS bug in the browser.
 app.add_middleware(AuthenticationMiddleware)
 app.add_middleware(ActivityMiddleware)
 app.add_middleware(SessionMiddleware)
 app.add_middleware(AuditMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimiterMiddleware)
+app.add_middleware(UnhandledErrorMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,

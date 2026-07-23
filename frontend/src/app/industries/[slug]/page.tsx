@@ -59,57 +59,65 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 bg-slate-900 overflow-hidden">
-        {/* Dynamic Background gradient based on industry color */}
+      <section className="relative bg-slate-900 overflow-hidden" style={{ minHeight: 'calc(100vh - 72px)' }}>
         <div 
           className="absolute inset-0 opacity-20" 
           style={{ background: `radial-gradient(circle at top right, ${industry.color}, transparent)` }}
         />
         
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="max-w-3xl">
-              <div className="flex items-center gap-3 mb-8 text-sm font-medium text-white/70">
-                <BackButton href="/industries" label="Back to Industries" className="text-white/80 hover:text-white border border-white/20 bg-white/5 rounded-full px-4 py-2 mr-4" />
+        <div className="max-w-7xl mx-auto px-6 relative z-10 h-full" style={{ minHeight: 'calc(100vh - 72px)' }}>
+          <div className="grid lg:grid-cols-2 gap-10 h-full" style={{ minHeight: 'calc(100vh - 72px)' }}>
+
+            {/* Left column */}
+            <div className="flex flex-col justify-center py-10">
+              {/* Breadcrumb + icon row */}
+              <div className="flex items-center gap-3 mb-5 text-sm font-medium text-white/70">
+                <BackButton href="/industries" label="Back to Industries" className="text-white/80 hover:text-white border border-white/20 bg-white/5 rounded-full px-4 py-2 mr-2" />
+                <div
+                  className="inline-flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0"
+                  style={{ backgroundColor: `${industry.color}20`, color: industry.color }}
+                >
+                  <Icon size={20} />
+                </div>
                 <Link href="/industries" className="hover:text-white transition-colors">Industries</Link>
                 <ChevronRight size={14} />
                 <span className="text-white">{industry.name}</span>
               </div>
 
-              <div 
-                className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-8"
-                style={{ backgroundColor: `${industry.color}20`, color: industry.color }}
-              >
-                <Icon size={32} />
-              </div>
-              
-              <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-6 leading-tight break-words" style={{ fontFamily: "'Sora', sans-serif" }}>
+              <h1 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-4 leading-tight break-words" style={{ fontFamily: "'Sora', sans-serif" }}>
                 Digital Marketing for <br />
                 <span style={{ color: industry.color }} className="inline-block max-w-full">{industry.name}</span>
               </h1>
-              <p className="text-xl text-white/80 leading-relaxed mb-10">
+              <p className="text-base lg:text-lg text-white/80 leading-relaxed mb-6">
                 {industry.fullDesc}
               </p>
               
-              <Link href="/contact" className="inline-flex items-center gap-2 bg-white text-slate-900 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-50 transition-colors">
-                Book Industry Audit <ArrowRight size={18} />
-              </Link>
+              <div>
+                <Link href="/contact" className="inline-flex items-center gap-2 bg-white text-slate-900 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-50 transition-colors">
+                  Book Industry Audit <ArrowRight size={18} />
+                </Link>
+              </div>
             </div>
             
-            <div className="hidden lg:block relative">
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-slate-900/40 to-transparent z-10 pointer-events-none" />
-              <Image 
-                src={industryImages[industry.slug] || '/images/industries/industry_it_1784618560373.png'} 
-                alt={`${industry.name} Digital Marketing`}
-                width={800}
-                height={460}
-                className="h-[460px] object-cover rounded-2xl shadow-2xl border border-white/10"
-              />
-              <div 
-                className="absolute -bottom-6 -left-6 w-32 h-32 rounded-full blur-3xl opacity-30 pointer-events-none z-0" 
-                style={{ backgroundColor: industry.color }}
-              />
+            {/* Right column — image fills full height */}
+            <div className="hidden lg:flex items-center py-10">
+              <div className="relative w-full h-full">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-slate-900/40 to-transparent z-10 pointer-events-none" />
+                <Image 
+                  src={industryImages[industry.slug] || '/images/industries/industry_it_1784618560373.png'} 
+                  alt={`${industry.name} Digital Marketing`}
+                  width={800}
+                  height={600}
+                  className="w-full h-full object-cover rounded-2xl shadow-2xl border border-white/10"
+                  style={{ maxHeight: 'calc(100vh - 160px)' }}
+                />
+                <div 
+                  className="absolute -bottom-6 -left-6 w-32 h-32 rounded-full blur-3xl opacity-30 pointer-events-none z-0" 
+                  style={{ backgroundColor: industry.color }}
+                />
+              </div>
             </div>
+
           </div>
         </div>
       </section>

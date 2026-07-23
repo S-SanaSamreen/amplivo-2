@@ -12,15 +12,22 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, hasHydrated } = useAuthStore();
   const [isMounted, setIsMounted] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line
     setIsMounted(true);
-    
-    // Allow checking after hydration to prevent mismatches
+
+    // The auth store rehydrates from localStorage asynchronously, so
+    // isAuthenticated is briefly false on every hard navigation/refresh
+    // even for a logged-in user. Wait for hasHydrated before deciding -
+    // otherwise this redirects a valid session to /login intermittently.
+    if (!hasHydrated) {
+      return;
+    }
+
     if (!isAuthenticated) {
       router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
       return;
@@ -40,7 +47,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     }
 
     setIsAuthorized(true);
-  }, [isAuthenticated, user, router, pathname, allowedRoles]);
+  }, [isAuthenticated, user, router, pathname, allowedRoles, hasHydrated]);
 
   // Show nothing while determining auth state on client (prevents flash of content)
   if (!isMounted || !isAuthorized) {

@@ -66,7 +66,7 @@ RETRY_ORDER = [
 ]
 
 async def run():
-    conn = await asyncpg.connect("postgresql://postgres:Shivanigoud%400918@db.fhxkiprlcdwbgtaxlffk.supabase.co:5432/postgres", ssl="require")
+    conn = await asyncpg.connect("postgresql://postgres:Shivanivpd123@db.fhxkiprlcdwbgtaxlffk.supabase.co:5432/postgres", ssl="require")
     
     for table_name in RETRY_ORDER:
         table = Base.metadata.tables[table_name]

@@ -6,7 +6,7 @@ import {
 
 // ─── Performance Area Chart ────────────────────────────────────────────────────
 interface PerformanceChartProps {
-  data: { month: string; impressions: number; clicks: number }[];
+  data: { month: string; revenue: number; adSpend: number }[];
   height?: number;
 }
 export function PerformanceChart({ data, height = 220 }: PerformanceChartProps) {
@@ -26,9 +26,13 @@ export function PerformanceChart({ data, height = 220 }: PerformanceChartProps) 
         <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
         <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fontSize: 11, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
-        <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #E2E8F0', fontSize: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }} />
-        <Area type="monotone" dataKey="impressions" stroke="#4C1D95" strokeWidth={2} fill="url(#gImp)" name="Impressions (M)" />
-        <Area type="monotone" dataKey="clicks" stroke="#06B6D4" strokeWidth={2} fill="url(#gClk)" name="Clicks (K)" />
+        <Tooltip
+          contentStyle={{ borderRadius: 12, border: '1px solid #E2E8F0', fontSize: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          formatter={(v: any, name: any) => [`₹${Number(v).toLocaleString()}`, name]}
+        />
+        <Area type="monotone" dataKey="revenue" stroke="#4C1D95" strokeWidth={2} fill="url(#gImp)" name="Revenue" />
+        <Area type="monotone" dataKey="adSpend" stroke="#06B6D4" strokeWidth={2} fill="url(#gClk)" name="Ad Spend" />
       </AreaChart>
     </ResponsiveContainer>
   );

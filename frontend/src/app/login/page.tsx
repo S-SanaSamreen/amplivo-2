@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { isAxiosError } from 'axios';
 import * as z from 'zod';
 import { Zap, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
 import { authService } from '@/services/authService';
@@ -56,19 +57,24 @@ export default function LoginPage() {
         router.push('/portal');
       }
     } catch (error: unknown) {
+<<<<<<< HEAD
       const axiosError = error as { response?: { data?: { detail?: string; message?: string }; status?: number }; message?: string };
       const apiMessage = axiosError?.response?.data?.message || axiosError?.response?.data?.detail;
+=======
+      if (!isAxiosError<{ detail?: string; message?: string }>(error)) {
+        setLoginError('Network error. Please try again.');
+        return;
+      }
+      const apiMessage = error.response?.data?.message || error.response?.data?.detail;
+>>>>>>> 2f78b874c940465090b619bc9ab05bca382ca104
       if (apiMessage) {
         setLoginError(apiMessage);
-      } else if (!axiosError?.response) {
+      } else if (!error.response) {
         setLoginError('Network error. Please try again.');
+      } else if (error.response.status === 500) {
+        setLoginError('Server error. The backend may have a database connection issue.');
       } else {
-        const status = axiosError?.response?.status;
-        if (status === 500) {
-          setLoginError('Server error. The backend may have a database connection issue.');
-        } else {
-          setLoginError('Invalid email or password. Please try again.');
-        }
+        setLoginError('Invalid email or password. Please try again.');
       }
     }
   };

@@ -33,6 +33,22 @@ export interface CampaignRead {
   updated_at: string;
 }
 
+// client_id / manager_id are UUID columns and start_date / end_date are date
+// columns on the backend (manager_id, start_date, end_date are optional;
+// client_id is required on create but optional on update). Form fields
+// default to '' rather than being omitted, and '' fails UUID/date
+// validation (422) where omitting the key does not.
+function withoutEmptyUuidFields<
+  T extends { client_id?: string; manager_id?: string; start_date?: string; end_date?: string }
+>(payload: T): T {
+  const cleaned = { ...payload };
+  if (!cleaned.client_id) delete cleaned.client_id;
+  if (!cleaned.manager_id) delete cleaned.manager_id;
+  if (!cleaned.start_date) delete cleaned.start_date;
+  if (!cleaned.end_date) delete cleaned.end_date;
+  return cleaned;
+}
+
 export const campaignService = {
   getAll: async (params?: {
     page?: number;
@@ -53,12 +69,12 @@ export const campaignService = {
   },
 
   create: async (payload: CampaignCreatePayload): Promise<CampaignRead> => {
-    const { data } = await api.post('/campaigns', payload);
+    const { data } = await api.post('/campaigns', withoutEmptyUuidFields(payload));
     return data;
   },
 
   update: async (id: string, payload: CampaignUpdatePayload): Promise<CampaignRead> => {
-    const { data } = await api.put(`/campaigns/${id}`, payload);
+    const { data } = await api.put(`/campaigns/${id}`, withoutEmptyUuidFields(payload));
     return data;
   },
 

@@ -97,14 +97,13 @@ export default function AdminSEOProjects() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) return;
+    if (!form.name.trim() || !form.domain.trim()) return;
     setSaving(true);
     setSaveError(null);
     try {
       await seoService.createProject({
         name: form.name.trim(),
-        client_name: form.client_name || undefined,
-        domain: form.domain || undefined,
+        target_url: form.domain.trim(),
         status: form.status,
       });
       setShowCreateModal(false);
@@ -275,6 +274,7 @@ export default function AdminSEOProjects() {
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Domain</label>
                 <input
                   type="text"
+                  required
                   value={form.domain}
                   onChange={(e) => setForm({ ...form, domain: e.target.value })}
                   className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-[#4C1D95]"

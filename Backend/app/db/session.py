@@ -2,6 +2,7 @@ import asyncio
 import ssl as _ssl
 import sys
 import time
+import uuid
 from collections.abc import AsyncGenerator
 
 from sqlalchemy import text
@@ -25,6 +26,24 @@ if settings.DB_SSL_MODE == "require":
     _connect_args: dict = {"ssl": _ssl_ctx}
 else:
     _connect_args: dict = {}
+
+# Supabase's pooled connection (Supavisor, port 6543) runs in transaction
+# mode: a physical backend connection can be handed to a different logical
+# client between statements. asyncpg/SQLAlchemy name server-side prepared
+# statements deterministically (__asyncpg_stmt_1__, _2__, ...) per fresh
+# DBAPI connection object, so a brand-new logical connection's first query
+# requests the same name a previous, unrelated logical connection may have
+# left prepared on that same physical backend session - raising
+# DuplicatePreparedStatementError. Disabling both cache layers
+# (statement_cache_size is asyncpg's; prepared_statement_cache_size is
+# SQLAlchemy's own, separate, asyncpg-dialect cache) does NOT fix this by
+# itself, since disabling the cache still goes through the same
+# deterministic name generator. The actual fix is forcing a globally-unique
+# name per prepare call via prepared_statement_name_func, so no two logical
+# connections can ever request the same name.
+_connect_args["statement_cache_size"] = 0
+_connect_args["prepared_statement_cache_size"] = 0
+_connect_args["prepared_statement_name_func"] = lambda: f"__asyncpg_{uuid.uuid4().hex}__"
 
 engine = create_async_engine(
     settings.DATABASE_URL,

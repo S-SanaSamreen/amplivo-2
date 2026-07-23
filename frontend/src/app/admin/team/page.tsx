@@ -19,11 +19,26 @@ interface UserListItem {
 interface Role { id: string; name: string; }
 interface Department { id: string; name: string; }
 
+// API list endpoints paginate as { items: [...] }. Normalizes defensively
+// against any shape (array already, { items }, { results }, { data }, or
+// null/undefined) so a mismatch never leaves a non-array in state - which
+// crashes every .map() call on that state ("x.map is not a function").
+function toArray<T>(response: unknown): T[] {
+  if (Array.isArray(response)) return response;
+  if (response && typeof response === 'object') {
+    const obj = response as Record<string, unknown>;
+    if (Array.isArray(obj.items)) return obj.items as T[];
+    if (Array.isArray(obj.results)) return obj.results as T[];
+    if (Array.isArray(obj.data)) return obj.data as T[];
+  }
+  return [];
+}
+
 interface PaginatedResponse {
-  results: UserListItem[];
-  count: number;
-  next: string | null;
-  previous: string | null;
+  items: UserListItem[];
+  total: number;
+  page: number;
+  page_size: number;
 }
 
 const PAGE_SIZE = 10;
@@ -59,8 +74,8 @@ export default function AdminTeam() {
       if (search) params.search = search;
       if (departmentFilter) params.department = departmentFilter;
       const data: PaginatedResponse = await userManagementService.getUsers(params);
-      setMembers(data.results || []);
-      setTotalCount(data.count || 0);
+      setMembers(toArray<UserListItem>(data));
+      setTotalCount(data?.total ?? 0);
     } catch {
       setMembers([]);
       setTotalCount(0);
@@ -79,8 +94,8 @@ export default function AdminTeam() {
         userManagementService.getRoles().catch(() => ({ results: [] })),
         userManagementService.getDepartments().catch(() => ({ results: [] })),
       ]).then(([r, d]: any[]) => {
-        setRoles(r.results || r || []);
-        setDepartments(d.results || d || []);
+        setRoles(toArray<Role>(r));
+        setDepartments(toArray<Department>(d));
       });
     }
   }, [showModal]);

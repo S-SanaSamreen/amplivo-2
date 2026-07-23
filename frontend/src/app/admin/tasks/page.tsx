@@ -20,10 +20,25 @@ interface Task {
 }
 
 interface PaginatedResponse {
-  results: Task[];
-  count: number;
-  next: string | null;
-  previous: string | null;
+  items: Task[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+// API list endpoints paginate as { items: [...] }, not { results: [...] }.
+// Normalizes defensively against any shape (array already, { items },
+// { results }, { data }, or null/undefined) so a mismatch never leaves a
+// non-array in state, which crashes every .map() call on that state.
+function toArray<T>(response: unknown): T[] {
+  if (Array.isArray(response)) return response;
+  if (response && typeof response === 'object') {
+    const obj = response as Record<string, unknown>;
+    if (Array.isArray(obj.items)) return obj.items as T[];
+    if (Array.isArray(obj.results)) return obj.results as T[];
+    if (Array.isArray(obj.data)) return obj.data as T[];
+  }
+  return [];
 }
 
 const STATUS_TABS = ['All', 'Todo', 'In Progress', 'Review', 'Done'];
@@ -63,8 +78,8 @@ export default function AdminTasks() {
       if (statusFilter !== 'All') params.status = statusFilter;
       if (priorityFilter) params.priority = priorityFilter;
       const data: PaginatedResponse = await taskService.getAll(params);
-      setTasks(data.results || []);
-      setTotalCount(data.count || 0);
+      setTasks(toArray<Task>(data));
+      setTotalCount(data?.total ?? 0);
     } catch {
       setTasks([]);
       setTotalCount(0);
@@ -78,11 +93,11 @@ export default function AdminTasks() {
   useEffect(() => {
     if (showModal) {
       Promise.all([
-        projectService.getAll({ page_size: 100 }).catch(() => ({ results: [] })),
-        userManagementService.getUsers({ page_size: 100 }).catch(() => ({ results: [] })),
+        projectService.getAll({ page_size: 100 }).catch(() => ({ items: [] })),
+        userManagementService.getUsers({ page_size: 100 }).catch(() => ({ items: [] })),
       ]).then(([p, u]: any[]) => {
-        setProjects(p.results || []);
-        setUsers(u.results || []);
+        setProjects(toArray(p));
+        setUsers(toArray(u));
       });
     }
   }, [showModal]);

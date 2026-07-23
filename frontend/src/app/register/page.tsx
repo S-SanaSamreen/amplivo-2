@@ -77,7 +77,9 @@ export default function RegisterPage() {
       if (apiMessage) {
         setRegisterError(apiMessage);
       } else if (!axiosError?.response) {
-        setRegisterError('Cannot connect to backend server. Please check if FastAPI server is running on http://localhost:8000.');
+        setRegisterError('Network error. Please check your connection and try again.');
+      } else if (axiosError?.response?.status === 500) {
+        setRegisterError('Server error. Please try again in a moment.');
       } else {
         setRegisterError('Registration failed. Please try again.');
       }

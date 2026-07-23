@@ -56,7 +56,7 @@ export default function LoginPage() {
         router.push('/portal');
       }
     } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { detail?: string; message?: string } }; message?: string };
+      const axiosError = error as { response?: { data?: { detail?: string; message?: string }; status?: number }; message?: string };
       const apiMessage = axiosError?.response?.data?.message || axiosError?.response?.data?.detail;
       if (apiMessage) {
         setLoginError(apiMessage);
